@@ -2,23 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbconfig/db";
 import Student from "@/models/Student";
 import AdAssignment from "@/models/AdAssignment";
+import { getSessionUser } from "@/lib/getSessionUser";
 
 export async function GET(req: NextRequest) {
   try {
     await connect();
 
-    const { searchParams } = new URL(req.url);
-    const staffId = searchParams.get("staffId");
-    console.log(staffId);
-    if (!staffId) {
-      return NextResponse.json(
-        { message: "Staff ID is required" },
-        { status: 400 },
-      );
+    const user = await getSessionUser();
+    if (!user || user.role !== "AD") {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-
-    // 1. Fetch the AD's specific room assignments
-    const assignment = await AdAssignment.findOne({ staffId: staffId });
+    const assignment = await AdAssignment.findOne({
+      staffId: user.profileId,
+    });
 
     if (!assignment || assignment.allocations.length === 0) {
       return NextResponse.json(
