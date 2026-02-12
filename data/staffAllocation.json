@@ -1,0 +1,139 @@
+[
+  {
+    "_id": {
+      "$oid": "688a18a711cf0ff53935f468"
+    },
+    "username": "Director",
+    "password": "1234",
+    "role": "director",
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "688660af1243cb5781887425"
+    },
+    "username": "Jovin",
+    "password": "1234",
+    "role": "ad",
+    "roomsIncharge": {
+      "block": "A",
+      "from": 129,
+      "to": 146
+    },
+    "createdAt": {
+      "$date": "2025-07-27T17:23:59.517Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "688660af1243cb5781887426"
+    },
+    "username": "Saravanan",
+    "password": "1234",
+    "role": "ad",
+    "roomsIncharge": {
+      "block": "A",
+      "from": 112,
+      "to": 128
+    },
+    "createdAt": {
+      "$date": "2025-07-27T17:23:59.517Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "688660af1243cb5781887427"
+    },
+    "username": "Vinoch",
+    "password": "1234",
+    "role": "ad",
+    "roomsIncharge": {
+      "block": "A",
+      "from": 49,
+      "to": 100
+    },
+    "createdAt": {
+      "$date": "2025-07-27T17:23:59.517Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6886f6d74d0bb37eae6ce556"
+    },
+    "username": "Rex",
+    "password": "1234",
+    "role": "ad",
+    "roomsIncharge": {
+      "block": "A",
+      "from": 2,
+      "to": 20,
+      "hall": ["Beschi Hall", "Britto Hall", "Xavier Hall", "Loyola Hall"]
+    },
+    "createdAt": {
+      "$date": "2025-07-28T04:04:39.711Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "688660af1243cb5781887423"
+    },
+    "username": "Augustin",
+    "password": "1234",
+    "role": "ad",
+    "roomsIncharge": {
+      "block": "A",
+      "from": 21,
+      "to": 48,
+      "hall": ["APH", "SH"]
+    },
+    "createdAt": {
+      "$date": "2025-07-27T17:23:59.516Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6889c155a21797a7bcf51afe"
+    },
+    "username": "Joe",
+    "password": "1234",
+    "role": "admin",
+    "roomsIncharge": {
+      "from": 21,
+      "to": 48,
+      "hall": ["APH", "SH"]
+    },
+    "createdAt": {
+      "$date": "2025-07-27T17:23:59.516Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "688660af1243cb5781887424"
+    },
+    "username": "Vimal Jerald",
+    "password": "1234",
+    "role": "ad",
+    "createdAt": {
+      "$date": "2025-07-27T17:23:59.517Z"
+    },
+    "__v": 0,
+    "roomsIncharge": [
+      {
+        "block": "B",
+        "from": 1,
+        "to": 20
+      },
+      {
+        "block": "C",
+        "from": 1,
+        "to": 4
+      }
+    ]
+  }
+]
