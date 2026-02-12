@@ -3,106 +3,104 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { Loader2, Lock, User } from "lucide-react";
-import axios, { AxiosError } from "axios";
+import { Loader2, Lock, User, ShieldCheck } from "lucide-react";
+import axios from "axios";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  
-  const { register, handleSubmit } = useForm();
+
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     setError("");
 
     try {
-      // Axios automatically sets Content-Type to application/json
-      const res = await axios.post("/api/auth/login", data);
+      // Backend sets HTTP-Only cookies (accessToken & refreshToken)
+      const res = await axios.post("/api/auth/login", {
+        ...data,
+        deviceId: navigator.userAgent,
+      });
 
-      // Access data directly
-      const result = res.data;
+      const { user } = res.data;
 
-      // Store token
-      localStorage.setItem("token", result.data.token);
-      localStorage.setItem("user", JSON.stringify(result.data.user));
+      // NO LOCAL STORAGE HERE
+      // We redirect based on the role returned in the response
+      if (user.role === "STUDENT") router.replace("/student/dashboard");
+      else if (user.role === "AD") router.push("/ad/attendance");
+      else if (user.role === "DIRECTOR" || user.role === "ADMIN") router.push("/admin/setup");
 
-      // Redirect based on role
-      const role = result.data.user.role;
-      if (role === "STUDENT") router.push("/student/dashboard");
-      else if (role === "AD") router.push("/ad/attendance");
-      else if (role === "DIRECTOR") router.push("/director/overview");
-      
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        // Safe access to the server's error message
-        setError(err.response?.data?.message || "Login failed");
-      } else {
-        setError("An unexpected error occurred");
-      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Authentication failed.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-        
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Hostel Portal</h1>
-          <p className="text-sm text-gray-500 mt-2">Sign in to your account</p>
+    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] p-4 font-sans text-slate-900">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div className="bg-slate-900 p-8 text-center text-white">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-blue-500 mb-4 shadow-inner">
+            <ShieldCheck className="w-7 h-7" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Hostel Systems</h1>
+          <p className="text-slate-400 text-sm mt-1">Management & Attendance Portal</p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-200">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Username / Reg No</label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                {...register("username", { required: true })}
-                type="text"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                placeholder="e.g. 24UCS537"
-              />
+        <div className="p-8">
+          {error && (
+            <div className="mb-6 p-4 text-sm text-red-700 bg-red-50 rounded-xl border border-red-100 font-medium">
+              <span className="font-bold">Error:</span> {error}
             </div>
-          </div>
+          )}
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                {...register("password", { required: true })}
-                type="password"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                placeholder="••••••••"
-              />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-900">Username / Register No</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  {...register("username", { required: "Username is required" })}
+                  type="text"
+                  className="block w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all font-semibold"
+                  placeholder="e.g. 24UCS537"
+                />
+              </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Sign In"
-            )}
-          </button>
-        </form>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-900">Password</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  {...register("password", { required: "Password is required" })}
+                  type="password"
+                  className="block w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all font-semibold"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center disabled:opacity-50"
+            >
+              {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : "Sign In to Portal"}
+            </button>
+          </form>
+
+          <p className="mt-8 text-xs text-slate-400 text-center font-bold uppercase tracking-widest">
+            Stateless Authentication Enabled
+          </p>
+        </div>
       </div>
     </div>
   );
