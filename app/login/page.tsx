@@ -29,7 +29,7 @@ export default function LoginPage() {
       // NO LOCAL STORAGE HERE
       // We redirect based on the role returned in the response
       if (user.role === "STUDENT") router.replace("/student/dashboard");
-      else if (user.role === "AD") router.push("/ad/attendance");
+      else if (user.role === "AD") router.push("/ad/dashboard");
       else if (user.role === "DIRECTOR" || user.role === "ADMIN") router.push("/admin/setup");
 
     } catch (err: any) {
