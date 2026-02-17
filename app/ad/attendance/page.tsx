@@ -49,14 +49,14 @@ export default function AttendancePage() {
             // 2. Fetch assigned students (server derives AD identity)
             const res = await axios.get("/api/attendance/fetch-list");
 
-            const sorted = res.data.data.sort((a: Student, b: Student) =>
+            const sorted = res.data.data.sort((a: any, b: any) =>
                 sortRooms(a.roomNo, b.roomNo),
             );
 
             setStudents(
-                sorted.map((s: Student) => ({
+                sorted.map((s: any) => ({
                     ...s,
-                    status: "PRESENT",
+                    status: s.initialStatus,
                 })),
             );
         } catch (err) {
@@ -175,43 +175,72 @@ export default function AttendancePage() {
                                 <th className="px-8 py-5 text-xs text-right">Status</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
-                            {students.map((student) => (
-                                <tr key={student._id}>
-                                    <td className="px-8 py-6 font-black text-xl">
-                                        {student.roomNo}
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <div className="font-bold uppercase">
-                                            {student.name}
-                                        </div>
-                                        <div className="text-xs text-slate-400">
-                                            {student.registerNo}
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex justify-end gap-2">
-                                            {[
-                                                { k: "PRESENT", i: CheckCircle },
-                                                { k: "ABSENT", i: XCircle },
-                                                { k: "ON_LEAVE", i: AlertCircle },
-                                            ].map(({ k, i: Icon }) => (
-                                                <button
-                                                    key={k}
-                                                    onClick={() => setStatus(student._id, k as any)}
-                                                    className={`px-4 py-2 rounded-xl text-xs font-black flex items-center border-2 ${student.status === k
-                                                            ? "bg-slate-900 text-white border-slate-900"
-                                                            : "bg-white text-slate-400"
-                                                        }`}
-                                                >
-                                                    <Icon className="w-3 h-3 mr-2" />
-                                                    {k.replace("_", " ")}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                        <tbody className="divide-y divide-slate-100">
+                            {students.map((student) => {
+                                // Check if the student was auto-marked as leave based on an approved request
+                                const isAutoLeave = student.status === "ON_LEAVE";
+
+                                return (
+                                    <tr
+                                        key={student._id}
+                                        className={`transition-colors ${isAutoLeave ? "bg-amber-50/50" : "hover:bg-slate-50"}`}
+                                    >
+                                        <td className="px-8 py-6">
+                                            <span className="font-black text-slate-900 text-xl tracking-tighter">
+                                                {student.roomNo}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center">
+                                                <div className="font-black text-slate-900 uppercase tracking-tight text-sm">
+                                                    {student.name}
+                                                </div>
+                                                {isAutoLeave && (
+                                                    <span className="ml-3 px-2 py-0.5 bg-amber-100 text-amber-700 border border-amber-200 rounded-md text-[9px] font-black uppercase tracking-widest">
+                                                        Approved Leave
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="text-[10px] font-bold text-slate-400 mt-0.5 tracking-widest">
+                                                {student.registerNo}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex justify-end gap-2">
+                                                {[
+                                                    { k: "PRESENT", i: CheckCircle, activeClass: "bg-slate-900 border-slate-900 text-white" },
+                                                    { k: "ABSENT", i: XCircle, activeClass: "bg-red-600 border-red-600 text-white shadow-red-100" },
+                                                    { k: "ON_LEAVE", i: AlertCircle, activeClass: "bg-amber-500 border-amber-500 text-white shadow-amber-100" },
+                                                ].map(({ k, i: Icon, activeClass }) => {
+                                                    const isActive = student.status === k;
+
+                                                    // NEW LOGIC: If student is ON_LEAVE, disable the other two buttons
+                                                    const isDisabled = isAutoLeave && k !== "ON_LEAVE";
+
+                                                    return (
+                                                        <button
+                                                            key={k}
+                                                            onClick={() => !isDisabled && setStatus(student._id, k as any)}
+                                                            disabled={isDisabled}
+                                                            className={`
+                    px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center border-2 transition-all
+                    ${isActive
+                                                                    ? `${activeClass} shadow-lg scale-105`
+                                                                    : "bg-white text-slate-400 border-slate-100 hover:border-slate-300"
+                                                                }
+                    ${isDisabled ? "opacity-20 cursor-not-allowed border-transparent grayscale" : ""}
+                  `}
+                                                        >
+                                                            <Icon className={`w-3 h-3 mr-2 ${isActive ? 'text-white' : ''}`} />
+                                                            {k.replace("_", " ")}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
